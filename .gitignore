@@ -5,3 +5,4 @@ __pycache__/
 *.egg-info/
 *.csv
 ./output/*
+.DS_Store

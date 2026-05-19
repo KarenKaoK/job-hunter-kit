@@ -6,7 +6,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from job_hunter_kit.models import FilterResult, JobPosting
+from job_hunter_kit.models import FilterResult, JobPosting, JobRunResult
 
 
 def load_jobs(path: str | Path) -> list[JobPosting]:
@@ -53,6 +53,48 @@ def save_filter_results_csv(path: str | Path, results: list[FilterResult]) -> No
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(_filter_result_csv_row(result) for result in results)
+
+
+def save_job_run_results_csv(path: str | Path, results: list[JobRunResult]) -> None:
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fieldnames = [
+        "status",
+        "job_key",
+        "first_collected_at",
+        "last_collected_at",
+        "decision",
+        "title",
+        "company",
+        "location",
+        "work_mode",
+        "language",
+        "source",
+        "url",
+        "matched_include_rules",
+        "matched_exclude_rules",
+        "reasons",
+        "has_description",
+        "description_length",
+        "description",
+    ]
+
+    with output_path.open("w", encoding="utf-8", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(_job_run_result_csv_row(result) for result in results)
+
+
+def _job_run_result_csv_row(result: JobRunResult) -> dict[str, str]:
+    row = _filter_result_csv_row(result.filter_result)
+    return {
+        "status": result.status,
+        "job_key": result.job_key,
+        "first_collected_at": result.first_collected_at,
+        "last_collected_at": result.last_collected_at,
+        **row,
+    }
 
 
 def _filter_result_csv_row(result: FilterResult) -> dict[str, str]:

@@ -1,7 +1,7 @@
 import csv
 
-from job_hunter_kit.io import save_filter_results_csv
-from job_hunter_kit.models import FilterResult, JobPosting
+from job_hunter_kit.io import save_filter_results_csv, save_job_run_results_csv
+from job_hunter_kit.models import FilterResult, JobPosting, JobRunResult
 
 
 def test_save_filter_results_csv_writes_expected_columns(tmp_path):
@@ -47,3 +47,41 @@ def test_save_filter_results_csv_writes_expected_columns(tmp_path):
             "description": "Analyze product data with Python.",
         }
     ]
+
+
+def test_save_job_run_results_csv_writes_status_and_job_key(tmp_path):
+    output_path = tmp_path / "jobs.csv"
+    filter_result = FilterResult(
+        job=JobPosting(
+            id="job-001",
+            title="Data Scientist",
+            company="Example AG",
+            location="Berlin, Germany",
+            source="linkedin",
+            description="Analyze product data.",
+            url="https://linkedin.com/jobs/view/001",
+        ),
+        decision="include",
+        matched_include_rules=[],
+        matched_exclude_rules=[],
+        reasons=[],
+    )
+    result = JobRunResult(
+        filter_result=filter_result,
+        job_key="url:https://linkedin.com/jobs/view/001",
+        status="new",
+        first_collected_at="2026-05-19T10:00:00+00:00",
+        last_collected_at="2026-05-19T10:00:00+00:00",
+    )
+
+    save_job_run_results_csv(output_path, [result])
+
+    with output_path.open("r", encoding="utf-8", newline="") as file:
+        rows = list(csv.DictReader(file))
+
+    assert rows[0]["status"] == "new"
+    assert rows[0]["job_key"] == "url:https://linkedin.com/jobs/view/001"
+    assert rows[0]["first_collected_at"] == "2026-05-19T10:00:00+00:00"
+    assert rows[0]["last_collected_at"] == "2026-05-19T10:00:00+00:00"
+    assert rows[0]["decision"] == "include"
+    assert rows[0]["description"] == "Analyze product data."

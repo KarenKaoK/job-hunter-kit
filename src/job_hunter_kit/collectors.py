@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -89,7 +90,7 @@ def _job_from_record(record: dict[str, Any]) -> JobPosting:
         company=company,
         location=location,
         source="linkedin",
-        description=_string_value(record, "description") or "",
+        description=_clean_description(_string_value(record, "description") or ""),
         work_mode=(
             _string_value(record, "work_mode")
             or _string_value(record, "job_type")
@@ -107,6 +108,10 @@ def _string_value(record: dict[str, Any], key: str) -> str | None:
 
     string_value = str(value).strip()
     return string_value or None
+
+
+def _clean_description(description: str) -> str:
+    return re.sub(r"\s+", " ", description).strip()
 
 
 def _deduplicate_jobs(jobs: list[JobPosting]) -> list[JobPosting]:

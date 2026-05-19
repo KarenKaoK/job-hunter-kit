@@ -6,6 +6,8 @@ from typing import Literal
 
 Decision = Literal["include", "exclude"]
 JobPlatform = Literal["linkedin"]
+JobStateStatus = Literal["seen", "applied"]
+JobRunStatus = Literal["new", "seen", "applied"]
 
 
 @dataclass(frozen=True)
@@ -57,3 +59,53 @@ class FilterResult:
     matched_include_rules: list[str]
     matched_exclude_rules: list[str]
     reasons: list[str]
+
+
+@dataclass(frozen=True)
+class JobStateEntry:
+    job_key: str
+    status: JobStateStatus
+    first_seen_at: str
+    last_seen_at: str
+    title: str
+    company: str
+    location: str
+    source: str
+    url: str
+    notes: str = ""
+
+
+@dataclass(frozen=True)
+class JobRunResult:
+    filter_result: FilterResult
+    job_key: str
+    status: JobRunStatus
+    first_collected_at: str
+    last_collected_at: str
+
+
+@dataclass(frozen=True)
+class MasterJobRow:
+    status: JobRunStatus
+    job_id: str
+    first_collected_at: str
+    last_collected_at: str
+    title: str
+    company: str
+    location: str
+    work_mode: str
+    language: str
+    source: str
+    url: str
+    description: str
+    notes: str = ""
+
+
+@dataclass(frozen=True)
+class MasterJobUpdate:
+    rows: list[MasterJobRow]
+    collected_count: int
+    included_count: int
+    new_count: int
+    seen_count: int
+    applied_count: int

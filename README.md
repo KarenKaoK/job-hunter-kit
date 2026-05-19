@@ -67,14 +67,20 @@ local CSV file:
 python scripts/collect_linkedin_jobs.py
 ```
 
-By default, this reads `examples/search_job_config.example.yaml` and writes
-`output/linkedin_jobs_filtered.csv`.
+By default, this reads `examples/search_job_config.example.yaml` and writes one
+editable master file: `output/linkedin_jobs.csv`.
 
-The CSV includes the job description plus `has_description` and
-`description_length` columns so you can quickly check whether LinkedIn returned
-useful description text. Full LinkedIn description fetching is enabled in the
-example config; this gives better output, but it can be slower and more fragile
-than listing-only collection.
+The master CSV keeps all included jobs collected so far. It includes `status`,
+`job_id`, `first_collected_at`, `last_collected_at`, job details, description,
+and `notes`. `status` is `new` when a job is first added, `seen` when it appears
+again in a later run, and `applied` when you mark it manually. To mark a job as
+applied, edit `output/linkedin_jobs.csv` and change that row's `status` to
+`applied`. You can also add personal notes in `notes`.
+
+`first_collected_at` stays fixed after the first time the job is collected;
+`last_collected_at` updates whenever the job appears again. Full LinkedIn
+description fetching is enabled in the example config; this gives better output,
+but it can be slower and more fragile than listing-only collection.
 
 To use custom paths:
 
@@ -88,6 +94,9 @@ The collection settings live in `examples/search_job_config.example.yaml` under
 `collection`. LinkedIn is the only supported platform in this first collection
 slice. The project does not use browser automation, login-protected scraping, CV
 matching, cover letter generation, or ATS review in Phase 1.
+
+
+##### to-do : translate ===========
 
 ### Phase 2: CV Matching and Application Prioritization
 

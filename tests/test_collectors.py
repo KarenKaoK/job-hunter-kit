@@ -82,6 +82,36 @@ def test_collect_jobs_converts_jobspy_rows_to_job_postings():
     assert jobs[0].url == "https://linkedin.com/jobs/view/123"
 
 
+def test_collect_jobs_cleans_description_whitespace():
+    def fake_scrape_jobs(**kwargs):
+        return FakeJobSpyFrame(
+            [
+                {
+                    "id": "linkedin-123",
+                    "title": "Data Scientist",
+                    "company": "Example Analytics AG",
+                    "location": "Munich, Germany",
+                    "job_url": "https://linkedin.com/jobs/view/123",
+                    "description": (
+                        "Analyze data\n\n\n"
+                        "with Python.\t\tBuild dashboards.\n"
+                        "   Communicate results."
+                    ),
+                }
+            ]
+        )
+
+    jobs = collect_jobs(
+        CollectionConfig(search_terms=["data scientist"]),
+        scrape_jobs_func=fake_scrape_jobs,
+    )
+
+    assert (
+        jobs[0].description
+        == "Analyze data with Python. Build dashboards. Communicate results."
+    )
+
+
 def test_collect_jobs_deduplicates_by_url():
     def fake_scrape_jobs(**kwargs):
         return FakeJobSpyFrame(
