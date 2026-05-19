@@ -70,6 +70,12 @@ python scripts/collect_linkedin_jobs.py
 By default, this reads `examples/search_job_config.example.yaml` and writes
 `output/linkedin_jobs_filtered.csv`.
 
+The CSV includes the job description plus `has_description` and
+`description_length` columns so you can quickly check whether LinkedIn returned
+useful description text. Full LinkedIn description fetching is enabled in the
+example config; this gives better output, but it can be slower and more fragile
+than listing-only collection.
+
 To use custom paths:
 
 ```bash

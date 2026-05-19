@@ -42,6 +42,8 @@ def test_save_filter_results_csv_writes_expected_columns(tmp_path):
             "matched_include_rules": "include.title_keywords:data scientist",
             "matched_exclude_rules": "",
             "reasons": "Matched include rule and no exclude rules.",
+            "has_description": "true",
+            "description_length": "33",
             "description": "Analyze product data with Python.",
         }
     ]

@@ -10,7 +10,7 @@ collection:
     - machine learning
   results_per_term: 5
   hours_old: 72
-  linkedin_fetch_description: false
+  linkedin_fetch_description: true
   translation:
     enabled: false
 

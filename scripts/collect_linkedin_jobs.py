@@ -25,10 +25,14 @@ def main() -> None:
     results = collect_filter_and_save_csv(args.config, args.output)
     included_count = sum(result.decision == "include" for result in results)
     excluded_count = sum(result.decision == "exclude" for result in results)
+    descriptions_count = sum(
+        bool(result.job.description.strip()) for result in results
+    )
 
     print(f"Saved {len(results)} results to {Path(args.output)}")
     print(f"Included: {included_count}")
     print(f"Excluded: {excluded_count}")
+    print(f"With descriptions: {descriptions_count}")
 
 
 if __name__ == "__main__":

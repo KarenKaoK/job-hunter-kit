@@ -10,6 +10,7 @@ def test_parse_search_config_with_valid_rules():
                 "search_terms": ["Data Scientist"],
                 "results_per_term": 10,
                 "hours_old": 24,
+                "linkedin_fetch_description": True,
             },
             "include": {
                 "title_keywords": ["Data Scientist"],
@@ -28,6 +29,7 @@ def test_parse_search_config_with_valid_rules():
     assert config.collection.search_terms == ["Data Scientist"]
     assert config.collection.results_per_term == 10
     assert config.collection.hours_old == 24
+    assert config.collection.linkedin_fetch_description is True
     assert config.include.title_keywords == ["Data Scientist"]
     assert config.include.locations == ["Berlin"]
     assert config.exclude.keywords == ["unpaid"]

@@ -33,6 +33,7 @@ def test_collect_jobs_calls_jobspy_for_each_search_term():
         search_terms=["machine learning engineer", "data scientist"],
         results_per_term=10,
         hours_old=24,
+        linkedin_fetch_description=True,
     )
 
     jobs = collect_jobs(config, scrape_jobs_func=fake_scrape_jobs)
@@ -45,7 +46,7 @@ def test_collect_jobs_calls_jobspy_for_each_search_term():
     assert all(call["location"] == "Germany" for call in calls)
     assert all(call["results_wanted"] == 10 for call in calls)
     assert all(call["hours_old"] == 24 for call in calls)
-    assert all(call["linkedin_fetch_description"] is False for call in calls)
+    assert all(call["linkedin_fetch_description"] is True for call in calls)
     assert [job.source for job in jobs] == ["linkedin", "linkedin"]
 
 

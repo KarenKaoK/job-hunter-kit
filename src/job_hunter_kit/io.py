@@ -44,6 +44,8 @@ def save_filter_results_csv(path: str | Path, results: list[FilterResult]) -> No
         "matched_include_rules",
         "matched_exclude_rules",
         "reasons",
+        "has_description",
+        "description_length",
         "description",
     ]
 
@@ -67,6 +69,8 @@ def _filter_result_csv_row(result: FilterResult) -> dict[str, str]:
         "matched_include_rules": "; ".join(result.matched_include_rules),
         "matched_exclude_rules": "; ".join(result.matched_exclude_rules),
         "reasons": "; ".join(result.reasons),
+        "has_description": str(bool(job.description.strip())).lower(),
+        "description_length": str(len(job.description)),
         "description": job.description,
     }
 
