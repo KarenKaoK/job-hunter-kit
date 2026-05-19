@@ -50,6 +50,39 @@ The configuration should support conditions such as:
 
 The goal of this phase is to reduce manual job browsing and create a cleaner list of potentially relevant opportunities.
 
+### Current Phase 1 Usage
+
+Install the project locally:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+```
+
+Collect LinkedIn jobs with JobSpy, apply the configured filters, and write a
+local CSV file:
+
+```bash
+python scripts/collect_linkedin_jobs.py
+```
+
+By default, this reads `examples/search_job_config.example.yaml` and writes
+`output/linkedin_jobs_filtered.csv`.
+
+To use custom paths:
+
+```bash
+python scripts/collect_linkedin_jobs.py \
+  --config examples/search_job_config.example.yaml \
+  --output output/my_jobs.csv
+```
+
+The collection settings live in `examples/search_job_config.example.yaml` under
+`collection`. LinkedIn is the only supported platform in this first collection
+slice. The project does not use browser automation, login-protected scraping, CV
+matching, cover letter generation, or ATS review in Phase 1.
+
 ### Phase 2: CV Matching and Application Prioritization
 
 The second phase focuses on comparing job postings with my CV and deciding which jobs are worth applying to.
@@ -77,4 +110,3 @@ This phase includes:
 - Suggesting final improvements before applying
 
 The goal of this phase is to make each application more targeted, consistent, and efficient.
-

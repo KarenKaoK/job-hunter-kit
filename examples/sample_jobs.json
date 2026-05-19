@@ -1,0 +1,46 @@
+[
+  {
+    "id": "sample-001",
+    "title": "Machine Learning Engineer",
+    "company": "Example Robotics GmbH",
+    "location": "Berlin, Germany",
+    "work_mode": "hybrid",
+    "language": "English",
+    "source": "sample",
+    "url": "https://example.com/jobs/sample-001",
+    "description": "Build machine learning systems for production. Python and English are required."
+  },
+  {
+    "id": "sample-002",
+    "title": "Data Scientist",
+    "company": "Example Analytics AG",
+    "location": "Munich, Germany",
+    "work_mode": "remote",
+    "language": "English",
+    "source": "sample",
+    "url": "https://example.com/jobs/sample-002",
+    "description": "Analyze product data, build forecasting models, and communicate results in English."
+  },
+  {
+    "id": "sample-003",
+    "title": "Senior Engineering Manager",
+    "company": "Example Platform GmbH",
+    "location": "Berlin, Germany",
+    "work_mode": "onsite",
+    "language": "English",
+    "source": "sample",
+    "url": "https://example.com/jobs/sample-003",
+    "description": "Lead multiple engineering teams and manage hiring plans."
+  },
+  {
+    "id": "sample-004",
+    "title": "AI Engineer",
+    "company": "Example Health GmbH",
+    "location": "Hamburg, Germany",
+    "work_mode": "hybrid",
+    "language": "Native German",
+    "source": "sample",
+    "url": "https://example.com/jobs/sample-004",
+    "description": "Develop AI features for healthcare workflows. Native German communication is required."
+  }
+]

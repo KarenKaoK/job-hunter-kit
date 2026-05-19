@@ -1,0 +1,38 @@
+collection:
+  provider: jobspy
+  platforms:
+    - linkedin
+  location: Germany
+  search_terms:
+    - machine learning engineer
+    - data scientist
+    - ai engineer
+    - machine learning
+  results_per_term: 5
+  hours_old: 72
+  linkedin_fetch_description: false
+  translation:
+    enabled: false
+
+include:
+  title_keywords: []
+  keywords: []
+  locations:
+    - Germany
+    - remote
+  work_modes:
+    - remote
+    - hybrid
+
+exclude:
+  title_keywords:
+    - manager
+  keywords:
+    - unpaid
+    - internship
+    - mindrift
+  language_requirements:
+    - native german
+
+sources:
+  - linkedin
