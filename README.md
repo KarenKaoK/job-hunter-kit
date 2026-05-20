@@ -101,6 +101,24 @@ matching, cover letter generation, or ATS review in Phase 1.
 
 `examples/search_job_config.example.yaml` remains as a template/reference file.
 
+### Dashboard
+
+Run the Streamlit dashboard:
+
+```bash
+streamlit run scripts/dashboard.py
+```
+
+Dashboard behavior:
+
+- Canonical editable file: `data/analyzed_jobs.csv`
+- Bootstrap source (first run only if CSV is missing):
+  `output/linked_jobs_analyzed.xlsx` sheet `job_ranking`
+- Editable columns only:
+  - `application_status`
+  - `applied_date`
+  - `notes`
+
 ### Phase 2: CV Matching and Application Prioritization
 
 The second phase focuses on comparing job postings with my CV and deciding which jobs are worth applying to.

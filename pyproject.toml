@@ -12,6 +12,8 @@ dependencies = [
     "PyYAML>=6.0",
     "python-jobspy>=1.1",
     "deep-translator>=1.11",
+    "streamlit>=1.35",
+    "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
