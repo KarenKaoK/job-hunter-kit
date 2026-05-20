@@ -1,6 +1,7 @@
 import csv
 
 from job_hunter_kit.master_csv import (
+    description_hash,
     load_master_jobs,
     master_job_id,
     merge_master_jobs,
@@ -49,6 +50,11 @@ def test_merge_master_jobs_adds_only_included_new_jobs():
         [],
         [included, excluded],
         collected_at="2026-05-20T08:00:00+00:00",
+        translation_enabled=False,
+        translation_provider="google",
+        translation_target_language="zh-CN",
+        translation_timeout_seconds=15,
+        translate_func=_fake_translate,
     )
 
     assert len(update.rows) == 1
@@ -58,6 +64,7 @@ def test_merge_master_jobs_adds_only_included_new_jobs():
     assert update.rows[0].last_collected_at == "2026-05-20T08:00:00+00:00"
     assert update.collected_count == 2
     assert update.included_count == 1
+    assert update.translated_count == 0
 
 
 def test_merge_master_jobs_marks_existing_new_job_as_seen():
@@ -71,6 +78,11 @@ def test_merge_master_jobs_marks_existing_new_job_as_seen():
         [existing],
         [result],
         collected_at="2026-05-20T08:00:00+00:00",
+        translation_enabled=False,
+        translation_provider="google",
+        translation_target_language="zh-CN",
+        translation_timeout_seconds=15,
+        translate_func=_fake_translate,
     )
 
     assert update.rows[0].status == "seen"
@@ -92,6 +104,11 @@ def test_merge_master_jobs_preserves_applied_status_notes_and_historical_rows():
         [applied, historical],
         [result],
         collected_at="2026-05-20T08:00:00+00:00",
+        translation_enabled=False,
+        translation_provider="google",
+        translation_target_language="zh-CN",
+        translation_timeout_seconds=15,
+        translate_func=_fake_translate,
     )
 
     rows_by_id = {row.job_id: row for row in update.rows}
@@ -124,11 +141,63 @@ def test_save_master_jobs_writes_simplified_columns(tmp_path):
         "source",
         "url",
         "description",
+        "description_zh",
+        "description_hash",
         "notes",
     ]
     assert rows[0]["job_id"] == "linkedin:job-001"
     assert "decision" not in rows[0]
     assert "matched_include_rules" not in rows[0]
+
+
+def test_merge_master_jobs_translates_new_and_changed_descriptions():
+    existing = _master_row(
+        description="Old description",
+        description_zh="旧描述",
+        description_hash=description_hash("Old description"),
+    )
+    changed = _filter_result(_job(id="job-001", description="New description"), "include")
+
+    update = merge_master_jobs(
+        [existing],
+        [changed],
+        collected_at="2026-05-20T08:00:00+00:00",
+        translation_enabled=True,
+        translation_provider="google",
+        translation_target_language="zh-CN",
+        translation_timeout_seconds=15,
+        translate_func=_fake_translate,
+    )
+
+    assert update.translated_count == 1
+    assert update.reused_translation_count == 0
+    assert update.translation_failed_count == 0
+    assert update.rows[0].description_zh == "ZH:New description"
+
+
+def test_merge_master_jobs_reuses_existing_translation_when_description_unchanged():
+    existing = _master_row(
+        description="Same description",
+        description_zh="中文描述",
+        description_hash=description_hash("Same description"),
+    )
+    same = _filter_result(_job(id="job-001", description="Same description"), "include")
+
+    update = merge_master_jobs(
+        [existing],
+        [same],
+        collected_at="2026-05-20T08:00:00+00:00",
+        translation_enabled=True,
+        translation_provider="google",
+        translation_target_language="zh-CN",
+        translation_timeout_seconds=15,
+        translate_func=_translate_should_not_be_called,
+    )
+
+    assert update.translated_count == 0
+    assert update.reused_translation_count == 1
+    assert update.translation_failed_count == 0
+    assert update.rows[0].description_zh == "中文描述"
 
 
 def _job(
@@ -169,6 +238,9 @@ def _master_row(
     job_id: str = "linkedin:job-001",
     title: str = "Data Scientist",
     status: str = "seen",
+    description: str = "Analyze product data.",
+    description_zh: str = "",
+    description_hash: str = "",
     notes: str = "",
 ) -> MasterJobRow:
     return MasterJobRow(
@@ -183,6 +255,26 @@ def _master_row(
         language="English",
         source="linkedin",
         url="",
-        description="Analyze product data.",
+        description=description,
+        description_zh=description_zh,
+        description_hash=description_hash,
         notes=notes,
     )
+
+
+def _fake_translate(
+    text: str,
+    provider: str,
+    target_language: str,
+    timeout_seconds: int,
+) -> str:
+    return f"ZH:{text}"
+
+
+def _translate_should_not_be_called(
+    text: str,
+    provider: str,
+    target_language: str,
+    timeout_seconds: int,
+) -> str:
+    raise AssertionError("translate function should not be called")

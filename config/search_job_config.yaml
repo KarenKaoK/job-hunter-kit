@@ -8,14 +8,14 @@ collection:
     - data scientist
     - ai engineer
     - machine learning
-  results_per_term: 5
-  hours_old: 72
+  results_per_term: 20
+  hours_old: 504
   linkedin_fetch_description: true
   translation:
     enabled: true
     provider: google
     target_language: zh-TW
-    timeout_seconds: 15
+    timeout_seconds: 60
 
 include:
   title_keywords: []

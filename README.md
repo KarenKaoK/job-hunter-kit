@@ -67,36 +67,39 @@ local CSV file:
 python scripts/collect_linkedin_jobs.py
 ```
 
-By default, this reads `examples/search_job_config.example.yaml` and writes one
+By default, this reads `config/search_job_config.yaml` and writes one
 editable master file: `output/linkedin_jobs.csv`.
 
 The master CSV keeps all included jobs collected so far. It includes `status`,
-`job_id`, `first_collected_at`, `last_collected_at`, job details, description,
-and `notes`. `status` is `new` when a job is first added, `seen` when it appears
-again in a later run, and `applied` when you mark it manually. To mark a job as
-applied, edit `output/linkedin_jobs.csv` and change that row's `status` to
-`applied`. You can also add personal notes in `notes`.
+`job_id`, `first_collected_at`, `last_collected_at`, job details, `description`,
+`description_zh`, and `notes`. `status` is `new` when a job is first added,
+`seen` when it appears again in a later run, and `applied` when you mark it
+manually. To mark a job as applied, edit `output/linkedin_jobs.csv` and change
+that row's `status` to `applied`. You can also add personal notes in `notes`.
 
 `first_collected_at` stays fixed after the first time the job is collected;
 `last_collected_at` updates whenever the job appears again. Full LinkedIn
 description fetching is enabled in the example config; this gives better output,
 but it can be slower and more fragile than listing-only collection.
 
+Translation is optional and controlled by `collection.translation` in the YAML
+config. The default provider is free Google translation via `deep-translator`.
+When translation is enabled, only new or changed descriptions are translated.
+
 To use custom paths:
 
 ```bash
 python scripts/collect_linkedin_jobs.py \
-  --config examples/search_job_config.example.yaml \
+  --config config/search_job_config.yaml \
   --output output/my_jobs.csv
 ```
 
-The collection settings live in `examples/search_job_config.example.yaml` under
+The active collection settings live in `config/search_job_config.yaml` under
 `collection`. LinkedIn is the only supported platform in this first collection
 slice. The project does not use browser automation, login-protected scraping, CV
 matching, cover letter generation, or ATS review in Phase 1.
 
-
-##### to-do : translate ===========
+`examples/search_job_config.example.yaml` remains as a template/reference file.
 
 ### Phase 2: CV Matching and Application Prioritization
 

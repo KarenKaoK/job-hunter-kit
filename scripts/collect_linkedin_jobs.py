@@ -12,7 +12,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--config",
-        default="examples/search_job_config.example.yaml",
+        default="config/search_job_config.yaml",
         help="Path to the YAML search config.",
     )
     parser.add_argument(
@@ -30,6 +30,9 @@ def main() -> None:
     print(f"New total: {update.new_count}")
     print(f"Seen total: {update.seen_count}")
     print(f"Applied total: {update.applied_count}")
+    print(f"Translated this run: {update.translated_count}")
+    print(f"Reused translation: {update.reused_translation_count}")
+    print(f"Translation failed: {update.translation_failed_count}")
 
 
 if __name__ == "__main__":

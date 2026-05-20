@@ -161,6 +161,9 @@ include:
     assert update.collected_count == 2
     assert update.included_count == 1
     assert update.applied_count == 1
+    assert update.translated_count == 0
+    assert update.reused_translation_count == 0
+    assert update.translation_failed_count == 0
 
     with output_path.open("r", encoding="utf-8", newline="") as file:
         rows = list(csv.DictReader(file))
@@ -171,5 +174,7 @@ include:
     assert rows[0]["first_collected_at"] == "2026-05-18T10:00:00+00:00"
     assert rows[0]["last_collected_at"] == "2026-05-20T10:00:00+00:00"
     assert rows[0]["description"] == "Analyze product data with Python."
+    assert rows[0]["description_zh"] == ""
+    assert rows[0]["description_hash"] != ""
     assert rows[0]["notes"] == "Applied already"
     assert "decision" not in rows[0]

@@ -30,6 +30,10 @@ def test_parse_search_config_with_valid_rules():
     assert config.collection.results_per_term == 10
     assert config.collection.hours_old == 24
     assert config.collection.linkedin_fetch_description is True
+    assert config.collection.translation_enabled is False
+    assert config.collection.translation_provider == "google"
+    assert config.collection.translation_target_language == "zh-CN"
+    assert config.collection.translation_timeout_seconds == 15
     assert config.include.title_keywords == ["Data Scientist"]
     assert config.include.locations == ["Berlin"]
     assert config.exclude.keywords == ["unpaid"]
@@ -50,6 +54,10 @@ def test_parse_search_config_defaults_missing_sections_to_empty_rules():
     assert config.collection.search_terms == []
     assert config.collection.results_per_term == 25
     assert config.collection.hours_old == 72
+    assert config.collection.translation_enabled is False
+    assert config.collection.translation_provider == "google"
+    assert config.collection.translation_target_language == "zh-CN"
+    assert config.collection.translation_timeout_seconds == 15
 
 
 def test_parse_search_config_rejects_non_mapping():

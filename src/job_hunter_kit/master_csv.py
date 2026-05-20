@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import csv
 import re
+from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
 
 from job_hunter_kit.models import FilterResult, JobPosting, MasterJobRow, MasterJobUpdate
+from job_hunter_kit.translator import description_hash
 
 
 MASTER_FIELDNAMES = [
@@ -21,6 +23,8 @@ MASTER_FIELDNAMES = [
     "source",
     "url",
     "description",
+    "description_zh",
+    "description_hash",
     "notes",
 ]
 
@@ -48,6 +52,11 @@ def merge_master_jobs(
     existing_rows: list[MasterJobRow],
     filter_results: list[FilterResult],
     collected_at: str,
+    translation_enabled: bool,
+    translation_provider: str,
+    translation_target_language: str,
+    translation_timeout_seconds: int,
+    translate_func: Callable[[str, str, str, int], str],
 ) -> MasterJobUpdate:
     existing_by_id = {row.job_id: row for row in existing_rows}
     merged_by_id = dict(existing_by_id)
@@ -55,22 +64,64 @@ def merge_master_jobs(
         result for result in filter_results if result.decision == "include"
     ]
 
+    translated_count = 0
+    reused_translation_count = 0
+    translation_failed_count = 0
+
     for result in included_results:
         job = result.job
         row_id = master_job_id(job)
         existing_row = existing_by_id.get(row_id)
+        desc_hash = description_hash(job.description)
+        translated_description = existing_row.description_zh if existing_row else ""
+
+        if translation_enabled:
+            should_translate = (
+                existing_row is None
+                or not existing_row.description_zh
+                or existing_row.description_hash != desc_hash
+            )
+            if should_translate:
+                try:
+                    translated_description = translate_func(
+                        job.description,
+                        translation_provider,
+                        translation_target_language,
+                        translation_timeout_seconds,
+                    )
+                    translated_count += 1
+                except Exception:
+                    translation_failed_count += 1
+                    translated_description = (
+                        existing_row.description_zh if existing_row else ""
+                    )
+            else:
+                reused_translation_count += 1
+
         if existing_row:
             merged_by_id[row_id] = _updated_existing_row(
-                existing_row,
-                job,
-                collected_at,
+                existing_row=existing_row,
+                job=job,
+                collected_at=collected_at,
+                translated_description=translated_description,
+                desc_hash=desc_hash,
             )
         else:
-            merged_by_id[row_id] = _new_master_row(job, row_id, collected_at)
+            merged_by_id[row_id] = _new_master_row(
+                job=job,
+                row_id=row_id,
+                collected_at=collected_at,
+                translated_description=translated_description,
+                desc_hash=desc_hash,
+            )
 
     rows = sorted(
         merged_by_id.values(),
-        key=lambda row: (row.first_collected_at, row.company.casefold(), row.title.casefold()),
+        key=lambda row: (
+            row.first_collected_at,
+            row.company.casefold(),
+            row.title.casefold(),
+        ),
     )
     return MasterJobUpdate(
         rows=rows,
@@ -79,6 +130,9 @@ def merge_master_jobs(
         new_count=sum(row.status == "new" for row in rows),
         seen_count=sum(row.status == "seen" for row in rows),
         applied_count=sum(row.status == "applied" for row in rows),
+        translated_count=translated_count,
+        reused_translation_count=reused_translation_count,
+        translation_failed_count=translation_failed_count,
     )
 
 
@@ -102,6 +156,8 @@ def _updated_existing_row(
     existing_row: MasterJobRow,
     job: JobPosting,
     collected_at: str,
+    translated_description: str,
+    desc_hash: str,
 ) -> MasterJobRow:
     status = "applied" if existing_row.status == "applied" else "seen"
     return replace(
@@ -116,6 +172,8 @@ def _updated_existing_row(
         source=job.source,
         url=job.url or "",
         description=job.description,
+        description_zh=translated_description,
+        description_hash=desc_hash,
     )
 
 
@@ -123,6 +181,8 @@ def _new_master_row(
     job: JobPosting,
     row_id: str,
     collected_at: str,
+    translated_description: str,
+    desc_hash: str,
 ) -> MasterJobRow:
     return MasterJobRow(
         status="new",
@@ -137,6 +197,8 @@ def _new_master_row(
         source=job.source,
         url=job.url or "",
         description=job.description,
+        description_zh=translated_description,
+        description_hash=desc_hash,
         notes="",
     )
 
@@ -155,6 +217,8 @@ def _row_from_csv(row: dict[str, str]) -> MasterJobRow:
         source=row.get("source", ""),
         url=row.get("url", ""),
         description=row.get("description", ""),
+        description_zh=row.get("description_zh", ""),
+        description_hash=row.get("description_hash", ""),
         notes=row.get("notes", ""),
     )
 
@@ -173,6 +237,8 @@ def _row_to_csv(row: MasterJobRow) -> dict[str, str]:
         "source": row.source,
         "url": row.url,
         "description": row.description,
+        "description_zh": row.description_zh,
+        "description_hash": row.description_hash,
         "notes": row.notes,
     }
 

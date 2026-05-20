@@ -19,6 +19,7 @@ from job_hunter_kit.state import (
     save_job_state,
     update_job_state,
 )
+from job_hunter_kit.translator import translate_text
 
 
 def collect_and_filter_jobs(
@@ -68,6 +69,15 @@ def collect_filter_merge_master_csv(
     filter_results = collect_and_filter_jobs(config, scrape_jobs_func=scrape_jobs_func)
     timestamp = collected_at or datetime.now(UTC).isoformat(timespec="seconds")
     existing_rows = load_master_jobs(output_path)
-    update = merge_master_jobs(existing_rows, filter_results, timestamp)
+    update = merge_master_jobs(
+        existing_rows=existing_rows,
+        filter_results=filter_results,
+        collected_at=timestamp,
+        translation_enabled=config.collection.translation_enabled,
+        translation_provider=config.collection.translation_provider,
+        translation_target_language=config.collection.translation_target_language,
+        translation_timeout_seconds=config.collection.translation_timeout_seconds,
+        translate_func=translate_text,
+    )
     save_master_jobs(output_path, update.rows)
     return update

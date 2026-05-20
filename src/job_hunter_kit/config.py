@@ -88,6 +88,18 @@ def _parse_collection_config(raw_collection: Any) -> CollectionConfig:
             translation.get("enabled", False),
             "collection.translation.enabled",
         ),
+        translation_provider=_parse_string(
+            translation.get("provider", "google"),
+            "collection.translation.provider",
+        ),
+        translation_target_language=_parse_string(
+            translation.get("target_language", "zh-CN"),
+            "collection.translation.target_language",
+        ),
+        translation_timeout_seconds=_parse_positive_int(
+            translation.get("timeout_seconds", 15),
+            "collection.translation.timeout_seconds",
+        ),
     )
 
 

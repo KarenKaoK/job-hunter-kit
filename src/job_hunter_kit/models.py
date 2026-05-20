@@ -42,6 +42,9 @@ class CollectionConfig:
     hours_old: int = 72
     linkedin_fetch_description: bool = False
     translation_enabled: bool = False
+    translation_provider: str = "google"
+    translation_target_language: str = "zh-CN"
+    translation_timeout_seconds: int = 15
 
 
 @dataclass(frozen=True)
@@ -98,6 +101,8 @@ class MasterJobRow:
     source: str
     url: str
     description: str
+    description_zh: str = ""
+    description_hash: str = ""
     notes: str = ""
 
 
@@ -109,3 +114,6 @@ class MasterJobUpdate:
     new_count: int
     seen_count: int
     applied_count: int
+    translated_count: int
+    reused_translation_count: int
+    translation_failed_count: int
