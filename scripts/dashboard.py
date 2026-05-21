@@ -30,6 +30,7 @@ from job_hunter_kit.dashboard_data import (
 DEFAULT_CSV_PATH = Path("data/analyzed_jobs.csv")
 DEFAULT_EXCEL_PATH = Path("output/linked_jobs_analyzed.xlsx")
 DEFAULT_EXCEL_SHEET = "job_ranking"
+SAVE_MESSAGE_KEY = "_save_success_message"
 
 
 def main() -> None:
@@ -47,6 +48,11 @@ def main() -> None:
     except Exception as error:
         st.error(str(error))
         st.stop()
+
+    pending_message = st.session_state.pop(SAVE_MESSAGE_KEY, "")
+    if pending_message:
+        st.success(pending_message)
+
     column_map = resolve_columns(df)
 
     st.caption(f"Rows loaded: {len(df)}")
@@ -166,6 +172,7 @@ def main() -> None:
         st.stop()
 
     selected_job = filtered_df.loc[selected_source_index]
+    selected_job_key = _selected_job_key(selected_job, int(selected_source_index))
 
     st.subheader("Selected Job Detail")
     st.markdown(f"**Company:** {value_for_field(selected_job, column_map, 'company') or 'N/A'}")
@@ -204,24 +211,33 @@ def main() -> None:
         st.markdown(value if value else "_N/A_")
 
     st.subheader("Application Edit")
+    status_widget_key = f"application_status_{selected_job_key}"
+    applied_date_widget_key = f"applied_date_{selected_job_key}"
+    notes_widget_key = f"notes_{selected_job_key}"
+
+    current_status = value_for_field(selected_job, column_map, "application_status")
+    current_status = (
+        current_status if current_status in APPLICATION_STATUS_OPTIONS else "Not Applied"
+    )
+    current_applied_date = value_for_field(selected_job, column_map, "applied_date")
+    current_notes = value_for_field(selected_job, column_map, "notes")
+
     edited_status = st.selectbox(
         "application_status",
         options=APPLICATION_STATUS_OPTIONS,
-        index=APPLICATION_STATUS_OPTIONS.index(
-            value_for_field(selected_job, column_map, "application_status")
-            if value_for_field(selected_job, column_map, "application_status")
-            in APPLICATION_STATUS_OPTIONS
-            else "Not Applied"
-        ),
+        index=APPLICATION_STATUS_OPTIONS.index(current_status),
+        key=status_widget_key,
     )
     edited_applied_date = st.text_input(
         "applied_date",
-        value=value_for_field(selected_job, column_map, "applied_date"),
+        value=current_applied_date,
+        key=applied_date_widget_key,
     )
     edited_notes = st.text_area(
         "notes",
-        value=value_for_field(selected_job, column_map, "notes"),
+        value=current_notes,
         height=140,
+        key=notes_widget_key,
     )
 
     if st.button("Save", type="primary"):
@@ -229,12 +245,29 @@ def main() -> None:
             original_df=df,
             column_map=column_map,
             row_index=int(selected_source_index),
-            application_status=edited_status,
-            applied_date=edited_applied_date,
-            notes=edited_notes,
+            application_status=st.session_state[status_widget_key],
+            applied_date=st.session_state[applied_date_widget_key],
+            notes=st.session_state[notes_widget_key],
         )
         save_dataframe(paths.csv_path, updated)
-        st.success(f"Saved selected row to {paths.csv_path}")
+        st.session_state[SAVE_MESSAGE_KEY] = f"Saved selected row to {paths.csv_path}"
+        st.rerun()
+
+
+def _selected_job_key(selected_job: pd.Series, row_index: int) -> str:
+    for key in ("job_id", "Job ID"):
+        value = str(selected_job.get(key, "")).strip()
+        if value:
+            return _safe_widget_key(value)
+    for key in ("url", "URL", "Job Link"):
+        value = str(selected_job.get(key, "")).strip()
+        if value:
+            return _safe_widget_key(value)
+    return f"row_{row_index}"
+
+
+def _safe_widget_key(value: str) -> str:
+    return "".join(ch if ch.isalnum() else "_" for ch in value)
 
 
 if __name__ == "__main__":
