@@ -119,6 +119,57 @@ Dashboard behavior:
   - `applied_date`
   - `notes`
 
+### Repeated Crawl Refresh (New Jobs Only)
+
+Current refresh flow is append-only for brand-new jobs (no changed-description
+re-analysis yet).
+
+Files used:
+
+- Latest crawl output: `output/linkedin_jobs.csv`
+- Canonical dashboard file: `data/analyzed_jobs.csv`
+- New jobs waiting for AI: `data/new_jobs_to_analyze.csv`
+- New AI results: `data/new_analyzed_jobs.csv`
+
+Step 1: export brand-new jobs for AI analysis
+
+```bash
+python scripts/export_new_jobs_to_analyze.py
+```
+
+Default behavior:
+
+- Compare `output/linkedin_jobs.csv` against `data/analyzed_jobs.csv`
+- Key priority: `job_id` first, fallback `url`
+- Export only jobs that are not already in analyzed CSV
+- Output: `data/new_jobs_to_analyze.csv`
+
+Step 2: append new AI-analyzed rows into canonical CSV
+
+```bash
+python scripts/append_analyzed_jobs.py
+```
+
+Default behavior:
+
+- Read `data/analyzed_jobs.csv` + `data/new_analyzed_jobs.csv`
+- Append only non-duplicate rows
+- Key priority: job id first, fallback URL
+- Preserve existing dashboard-edited fields by leaving existing rows unchanged
+- For appended rows, default `application_status` to `Not Applied` if missing
+
+Supported key header aliases (for compatibility with different CSV templates):
+
+- Job ID: `job_id`, `Job ID`
+- URL: `url`, `URL`, `Job Link`
+
+Notes:
+
+- This slice does not update existing analyzed rows yet.
+- This slice does not compare description changes yet.
+- Streamlit remains unchanged and continues reading/writing
+  `data/analyzed_jobs.csv`.
+
 ### Phase 2: CV Matching and Application Prioritization
 
 The second phase focuses on comparing job postings with my CV and deciding which jobs are worth applying to.
