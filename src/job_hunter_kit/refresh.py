@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import csv
+import re
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 EXPORT_COLUMNS = [
@@ -26,12 +28,18 @@ USER_EDIT_FIELDS = [
 
 def key_from_row(row: dict[str, str]) -> str | None:
     job_id = _first_non_empty(row, ["job_id", "Job ID"])
-    if job_id:
-        return f"job_id:{job_id}"
-
     url = _first_non_empty(row, ["url", "URL", "Job Link"])
-    if url:
-        return f"url:{url}"
+    linkedin_id = _linkedin_job_id(job_id) or _linkedin_job_id(url)
+    if linkedin_id:
+        return f"linkedin:{linkedin_id}"
+
+    normalized_job_id = _normalize_job_id(job_id)
+    if normalized_job_id:
+        return f"job_id:{normalized_job_id}"
+
+    normalized_url = _normalize_url(url)
+    if normalized_url:
+        return f"url:{normalized_url}"
 
     return None
 
@@ -172,6 +180,46 @@ def append_new_analyzed_jobs(
     }
 
 
+def dedupe_analyzed_jobs_file(
+    analyzed_path: str | Path,
+    apply: bool = False,
+) -> dict[str, int]:
+    rows, fieldnames = read_csv_rows(analyzed_path)
+    if not rows:
+        return {
+            "input_rows": 0,
+            "output_rows": 0,
+            "duplicates_removed": 0,
+            "invalid_key_rows": 0,
+        }
+
+    deduped_rows: list[dict[str, str]] = []
+    seen_keys: set[str] = set()
+    invalid_key_rows = 0
+
+    for row in rows:
+        key = key_from_row(row)
+        if key is None:
+            invalid_key_rows += 1
+            deduped_rows.append(row)
+            continue
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        deduped_rows.append(row)
+
+    duplicates_removed = len(rows) - len(deduped_rows)
+    if apply:
+        write_csv_rows(analyzed_path, deduped_rows, fieldnames)
+
+    return {
+        "input_rows": len(rows),
+        "output_rows": len(deduped_rows),
+        "duplicates_removed": duplicates_removed,
+        "invalid_key_rows": invalid_key_rows,
+    }
+
+
 def _merge_fieldnames(existing_fields: list[str], new_fields: list[str]) -> list[str]:
     merged: list[str] = []
     for fields in (existing_fields, new_fields):
@@ -194,3 +242,39 @@ def _first_non_empty(row: dict[str, str], keys: list[str]) -> str:
         if value:
             return value
     return ""
+
+
+def _linkedin_job_id(value: str) -> str:
+    if not value:
+        return ""
+
+    text = value.strip()
+    prefixed = re.fullmatch(r"linkedin:(\d+)", text, flags=re.IGNORECASE)
+    if prefixed:
+        return prefixed.group(1)
+
+    numeric = re.fullmatch(r"\d+", text)
+    if numeric:
+        return numeric.group(0)
+
+    url_match = re.search(r"/jobs/view/(\d+)", text)
+    if url_match:
+        return url_match.group(1)
+
+    return ""
+
+
+def _normalize_job_id(job_id: str) -> str:
+    return job_id.strip().casefold()
+
+
+def _normalize_url(url: str) -> str:
+    if not url:
+        return ""
+
+    parsed = urlparse(url.strip())
+    if not parsed.scheme and not parsed.netloc:
+        return url.strip().casefold()
+
+    path = parsed.path.rstrip("/")
+    return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{path}"

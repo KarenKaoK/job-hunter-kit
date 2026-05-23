@@ -1,6 +1,10 @@
 import csv
 
-from job_hunter_kit.refresh import append_new_analyzed_jobs, export_new_jobs_to_analyze
+from job_hunter_kit.refresh import (
+    append_new_analyzed_jobs,
+    dedupe_analyzed_jobs_file,
+    export_new_jobs_to_analyze,
+)
 
 
 def test_export_new_jobs_to_analyze_uses_job_id_then_url_and_exports_only_new(tmp_path):
@@ -226,6 +230,93 @@ def test_append_new_analyzed_jobs_supports_job_link_alias(tmp_path):
 
     assert summary["appended"] == 1
     assert len(rows) == 2
+
+
+def test_append_new_analyzed_jobs_treats_linkedin_prefixed_and_numeric_ids_as_duplicate(tmp_path):
+    analyzed_path = tmp_path / "analyzed_jobs.csv"
+    new_analyzed_path = tmp_path / "new_analyzed_jobs.csv"
+
+    _write_csv(
+        analyzed_path,
+        [
+            {
+                "Job ID": "linkedin:4385373055",
+                "URL": "https://www.linkedin.com/jobs/view/4385373055",
+                "Title": "Existing",
+            }
+        ],
+    )
+    _write_csv(
+        new_analyzed_path,
+        [
+            {
+                "Job ID": "4385373055",
+                "URL": "https://www.linkedin.com/jobs/view/4385373055",
+                "Title": "Should Skip",
+            }
+        ],
+    )
+
+    summary = append_new_analyzed_jobs(analyzed_path, new_analyzed_path)
+    rows = _read_csv(analyzed_path)
+
+    assert summary["duplicates_skipped"] == 1
+    assert summary["appended"] == 0
+    assert len(rows) == 1
+
+
+def test_append_new_analyzed_jobs_treats_linkedin_url_with_query_as_duplicate(tmp_path):
+    analyzed_path = tmp_path / "analyzed_jobs.csv"
+    new_analyzed_path = tmp_path / "new_analyzed_jobs.csv"
+
+    _write_csv(
+        analyzed_path,
+        [
+            {
+                "URL": "https://www.linkedin.com/jobs/view/1234567890",
+                "Title": "Existing",
+            }
+        ],
+    )
+    _write_csv(
+        new_analyzed_path,
+        [
+            {
+                "URL": "https://www.linkedin.com/jobs/view/1234567890/?trackingId=abc#section",
+                "Title": "Should Skip",
+            }
+        ],
+    )
+
+    summary = append_new_analyzed_jobs(analyzed_path, new_analyzed_path)
+    rows = _read_csv(analyzed_path)
+
+    assert summary["duplicates_skipped"] == 1
+    assert summary["appended"] == 0
+    assert len(rows) == 1
+
+
+def test_dedupe_analyzed_jobs_file_removes_canonical_duplicates_and_keeps_invalid(tmp_path):
+    analyzed_path = tmp_path / "analyzed_jobs.csv"
+    _write_csv(
+        analyzed_path,
+        [
+            {"Job ID": "linkedin:123", "URL": "https://www.linkedin.com/jobs/view/123"},
+            {"Job ID": "123", "URL": "https://www.linkedin.com/jobs/view/123?trk=feed"},
+            {"Job ID": "", "URL": "", "Title": "No key"},
+        ],
+    )
+
+    dry_run_summary = dedupe_analyzed_jobs_file(analyzed_path, apply=False)
+    assert dry_run_summary["input_rows"] == 3
+    assert dry_run_summary["output_rows"] == 2
+    assert dry_run_summary["duplicates_removed"] == 1
+    assert dry_run_summary["invalid_key_rows"] == 1
+    assert len(_read_csv(analyzed_path)) == 3
+
+    apply_summary = dedupe_analyzed_jobs_file(analyzed_path, apply=True)
+    assert apply_summary["output_rows"] == 2
+    assert len(_read_csv(analyzed_path)) == 2
 
 def _write_csv(path, rows):
     fieldnames = []

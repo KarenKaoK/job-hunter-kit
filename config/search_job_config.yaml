@@ -8,8 +8,9 @@ collection:
     - data scientist
     - ai engineer
     - machine learning
+    - MLops
   results_per_term: 20
-  hours_old: 504
+  hours_old: 72
   linkedin_fetch_description: true
   translation:
     enabled: true
@@ -34,6 +35,8 @@ exclude:
     - unpaid
     - internship
     - mindrift
+    - Findr
+    - Jobgether
   language_requirements:
     - native german
 
