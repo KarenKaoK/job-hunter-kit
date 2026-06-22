@@ -37,6 +37,7 @@ APPLICATION_STATUS_OPTIONS = [
     "Interview",
     "Saved",
     "Skipped",
+    "Deleted",
 ]
 FIELD_ALIASES = {
     "company": ["company", "Company", "公司"],
@@ -164,6 +165,10 @@ def compact_list_columns(df: pd.DataFrame) -> list[str]:
         if col and col in df.columns:
             columns.append(col)
     return columns
+
+
+def sort_for_dashboard(df: pd.DataFrame) -> pd.DataFrame:
+    return df.sort_index(ascending=False)
 
 
 def selected_row_index(filtered_df: pd.DataFrame, selected_index: int | None) -> int | None:

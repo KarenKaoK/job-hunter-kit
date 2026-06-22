@@ -15,6 +15,7 @@ from job_hunter_kit.dashboard_data import (
     resolve_columns,
     selector_label,
     selected_row_index,
+    sort_for_dashboard,
     update_selected_row,
     value_for_field,
 )
@@ -45,6 +46,32 @@ def test_load_or_bootstrap_reads_csv_when_present(tmp_path):
 
     assert len(df) == 1
     assert df.loc[0, "application_status"] == "Applied"
+
+
+def test_load_or_bootstrap_keeps_deleted_status(tmp_path):
+    csv_path = tmp_path / "analyzed_jobs.csv"
+    excel_path = tmp_path / "linked_jobs_analyzed.xlsx"
+    pd.DataFrame(
+        [
+            {
+                "title": "Data Scientist",
+                "company": "Example AG",
+                "application_status": "Deleted",
+                "applied_date": "",
+                "notes": "not a fit",
+            }
+        ]
+    ).to_csv(csv_path, index=False)
+
+    df = load_or_bootstrap_dataframe(
+        DashboardPaths(
+            csv_path=csv_path,
+            excel_path=excel_path,
+            excel_sheet="job_ranking",
+        )
+    )
+
+    assert df.loc[0, "application_status"] == "Deleted"
 
 
 def test_load_or_bootstrap_reads_excel_when_csv_missing(tmp_path):
@@ -198,6 +225,22 @@ def test_selected_row_index_uses_existing_or_falls_back_to_first():
     assert selected_row_index(df, 11) == 11
     assert selected_row_index(df, 999) == 10
     assert selected_row_index(df, None) == 10
+
+
+def test_sort_for_dashboard_orders_larger_source_index_first():
+    df = pd.DataFrame(
+        [
+            {"title": "Oldest"},
+            {"title": "Middle"},
+            {"title": "Newest"},
+        ],
+        index=[0, 5, 9],
+    )
+
+    sorted_df = sort_for_dashboard(df)
+
+    assert list(sorted_df.index) == [9, 5, 0]
+    assert list(sorted_df["title"]) == ["Newest", "Middle", "Oldest"]
 
 
 def test_selected_row_index_returns_none_for_empty_frame():

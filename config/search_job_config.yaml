@@ -37,6 +37,7 @@ exclude:
     - mindrift
     - Findr
     - Jobgether
+    - HIBA GmbH
   language_requirements:
     - native german
 
