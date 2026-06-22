@@ -114,10 +114,17 @@ Dashboard behavior:
 - Canonical editable file: `data/analyzed_jobs.csv`
 - Bootstrap source (first run only if CSV is missing):
   `output/linked_jobs_analyzed.xlsx` sheet `job_ranking`
+- Jobs are shown with the largest source index first, so newly appended rows
+  appear near the top.
+- The dashboard uses a two-column review layout: filters and job list on the
+  left, selected job details and application controls on the right.
 - Editable columns only:
   - `application_status`
   - `applied_date`
   - `notes`
+- Quick status buttons include `Applied`, `Saved`, `Rejected`, and `Deleted`.
+  `Deleted` means you decided the job is not suitable for your workflow; it
+  does not remove the row from `data/analyzed_jobs.csv`.
 
 ### Repeated Crawl Refresh (New Jobs Only)
 
