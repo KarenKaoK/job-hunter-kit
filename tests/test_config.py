@@ -7,6 +7,7 @@ def test_parse_search_config_with_valid_rules():
     config = parse_search_config(
         {
             "collection": {
+                "locations": ["Berlin", "Netherlands"],
                 "search_terms": ["Data Scientist"],
                 "results_per_term": 10,
                 "hours_old": 24,
@@ -26,6 +27,7 @@ def test_parse_search_config_with_valid_rules():
 
     assert config.collection.platforms == ["linkedin"]
     assert config.collection.location == "Germany"
+    assert config.collection.locations == ["Berlin", "Netherlands"]
     assert config.collection.search_terms == ["Data Scientist"]
     assert config.collection.results_per_term == 10
     assert config.collection.hours_old == 24
@@ -51,6 +53,7 @@ def test_parse_search_config_defaults_missing_sections_to_empty_rules():
     assert config.collection.provider == "jobspy"
     assert config.collection.platforms == ["linkedin"]
     assert config.collection.location == "Germany"
+    assert config.collection.locations == []
     assert config.collection.search_terms == []
     assert config.collection.results_per_term == 25
     assert config.collection.hours_old == 72

@@ -37,6 +37,7 @@ class CollectionConfig:
     provider: str = "jobspy"
     platforms: list[JobPlatform] = field(default_factory=lambda: ["linkedin"])
     location: str = "Germany"
+    locations: list[str] = field(default_factory=list)
     search_terms: list[str] = field(default_factory=list)
     results_per_term: int = 25
     hours_old: int = 72

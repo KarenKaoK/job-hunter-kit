@@ -50,6 +50,50 @@ def test_collect_jobs_calls_jobspy_for_each_search_term():
     assert [job.source for job in jobs] == ["linkedin", "linkedin"]
 
 
+def test_collect_jobs_calls_jobspy_for_each_location_and_search_term():
+    calls = []
+
+    def fake_scrape_jobs(**kwargs):
+        calls.append(kwargs)
+        return FakeJobSpyFrame(
+            [
+                {
+                    "id": f"{kwargs['location']}-{kwargs['search_term']}",
+                    "title": "Data Scientist",
+                    "company": "Example AG",
+                    "location": kwargs["location"],
+                    "job_url": (
+                        "https://linkedin.com/jobs/"
+                        f"{kwargs['location']}-{kwargs['search_term']}"
+                    ),
+                    "description": "Analyze data with Python.",
+                }
+            ]
+        )
+
+    config = CollectionConfig(
+        locations=["Berlin", "Munich", "Europe", "Netherlands"],
+        search_terms=["data scientist", "ai engineer"],
+    )
+
+    jobs = collect_jobs(config, scrape_jobs_func=fake_scrape_jobs)
+
+    assert [
+        (call["location"], call["search_term"])
+        for call in calls
+    ] == [
+        ("Berlin", "data scientist"),
+        ("Berlin", "ai engineer"),
+        ("Munich", "data scientist"),
+        ("Munich", "ai engineer"),
+        ("Europe", "data scientist"),
+        ("Europe", "ai engineer"),
+        ("Netherlands", "data scientist"),
+        ("Netherlands", "ai engineer"),
+    ]
+    assert len(jobs) == 8
+
+
 def test_collect_jobs_converts_jobspy_rows_to_job_postings():
     def fake_scrape_jobs(**kwargs):
         return FakeJobSpyFrame(

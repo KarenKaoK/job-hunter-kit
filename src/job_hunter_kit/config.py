@@ -61,13 +61,20 @@ def _parse_collection_config(raw_collection: Any) -> CollectionConfig:
     if not isinstance(translation, dict):
         raise ConfigError("collection.translation must be a mapping.")
 
+    location = _parse_string(
+        raw_collection.get("location", "Germany"),
+        "collection.location",
+    )
+    locations = _parse_string_list(
+        raw_collection.get("locations", []),
+        "collection.locations",
+    )
+
     return CollectionConfig(
         provider=provider,
         platforms=platforms or ["linkedin"],
-        location=_parse_string(
-            raw_collection.get("location", "Germany"),
-            "collection.location",
-        ),
+        location=location,
+        locations=locations,
         search_terms=_parse_string_list(
             raw_collection.get("search_terms", []),
             "collection.search_terms",

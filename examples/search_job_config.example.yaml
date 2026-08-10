@@ -2,7 +2,11 @@ collection:
   provider: jobspy
   platforms:
     - linkedin
-  location: Germany
+  locations:
+    - Berlin
+    - Munich
+    - Europe
+    - Netherlands
   search_terms:
     - machine learning engineer
     - data scientist
@@ -21,7 +25,10 @@ include:
   title_keywords: []
   keywords: []
   locations:
-    - Germany
+    - Berlin
+    - Munich
+    - Europe
+    - Netherlands
     - remote
   work_modes:
     - remote

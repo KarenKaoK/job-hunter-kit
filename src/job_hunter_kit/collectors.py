@@ -20,18 +20,23 @@ def collect_jobs(
     scraper = scrape_jobs_func or _load_jobspy_scraper()
     jobs: list[JobPosting] = []
 
-    for search_term in config.search_terms:
-        raw_jobs = scraper(
-            site_name=config.platforms,
-            search_term=search_term,
-            location=config.location,
-            results_wanted=config.results_per_term,
-            hours_old=config.hours_old,
-            linkedin_fetch_description=config.linkedin_fetch_description,
-        )
-        jobs.extend(_parse_jobspy_records(raw_jobs))
+    for location in _collection_locations(config):
+        for search_term in config.search_terms:
+            raw_jobs = scraper(
+                site_name=config.platforms,
+                search_term=search_term,
+                location=location,
+                results_wanted=config.results_per_term,
+                hours_old=config.hours_old,
+                linkedin_fetch_description=config.linkedin_fetch_description,
+            )
+            jobs.extend(_parse_jobspy_records(raw_jobs))
 
     return _deduplicate_jobs(jobs)
+
+
+def _collection_locations(config: CollectionConfig) -> list[str]:
+    return config.locations or [config.location]
 
 
 def _load_jobspy_scraper() -> ScrapeJobsFunc:
