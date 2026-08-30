@@ -7,6 +7,11 @@ collection:
     - Munich
     - Europe
     - Netherlands
+    - Czechia
+    - Czech Republic
+    - Prague
+    - Brno
+    - Ostrava
   search_terms:
     - machine learning engineer
     - data scientist
@@ -30,6 +35,13 @@ include:
     - Munich
     - Europe
     - Netherlands
+    - Czechia
+    - Czech Republic
+    - Czech
+    - Prague
+    - Praha
+    - Brno
+    - Ostrava
     - remote
   work_modes:
     - remote
