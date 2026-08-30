@@ -3,15 +3,15 @@ collection:
   platforms:
     - linkedin
   locations:
+    - Netherlands
+    - France
+    - Czechia
     - Berlin
     - Munich
-    - Europe
-    - Netherlands
-    - Czechia
-    - Czech Republic
+    - Essen
     - Prague
     - Brno
-    - Ostrava
+    - Paris
   search_terms:
     - machine learning engineer
     - data scientist
@@ -31,17 +31,18 @@ include:
   title_keywords: []
   keywords: []
   locations:
-    - Berlin
-    - Munich
-    - Europe
     - Netherlands
+    - France
     - Czechia
     - Czech Republic
     - Czech
+    - Berlin
+    - Munich
+    - Essen
     - Prague
     - Praha
     - Brno
-    - Ostrava
+    - Paris
     - remote
   work_modes:
     - remote
