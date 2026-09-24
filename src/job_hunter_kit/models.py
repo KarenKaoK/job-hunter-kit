@@ -5,7 +5,7 @@ from typing import Literal
 
 
 Decision = Literal["include", "exclude"]
-JobPlatform = Literal["linkedin"]
+JobPlatform = Literal["linkedin", "glassdoor"]
 JobStateStatus = Literal["seen", "applied"]
 JobRunStatus = Literal["new", "seen", "applied"]
 
@@ -41,6 +41,7 @@ class CollectionConfig:
     search_terms: list[str] = field(default_factory=list)
     results_per_term: int = 25
     hours_old: int = 72
+    country_indeed: str = "Germany"
     linkedin_fetch_description: bool = False
     translation_enabled: bool = False
     translation_provider: str = "google"

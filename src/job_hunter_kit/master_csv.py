@@ -5,6 +5,7 @@ import re
 from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from job_hunter_kit.models import FilterResult, JobPosting, MasterJobRow, MasterJobUpdate
 from job_hunter_kit.translator import description_hash
@@ -138,9 +139,14 @@ def merge_master_jobs(
 
 def master_job_id(job: JobPosting) -> str:
     source = job.source.casefold()
-    url_id = _linkedin_id_from_url(job.url or "")
-    if url_id:
-        return f"{source}:{url_id}"
+    if source == "linkedin":
+        url_id = _linkedin_id_from_url(job.url or "")
+        if url_id:
+            return f"{source}:{url_id}"
+    if source == "glassdoor":
+        url_id = _glassdoor_id_from_url(job.url or "")
+        if url_id:
+            return f"{source}:{url_id}"
 
     if job.id and not _looks_like_url(job.id) and "|" not in job.id:
         return f"{source}:{_slug(job.id)}"
@@ -148,6 +154,11 @@ def master_job_id(job: JobPosting) -> str:
     id_url_id = _linkedin_id_from_url(job.id)
     if id_url_id:
         return f"{source}:{id_url_id}"
+
+    if source == "glassdoor":
+        id_url_id = _glassdoor_id_from_url(job.id)
+        if id_url_id:
+            return f"{source}:{id_url_id}"
 
     return f"{source}:{_slug('-'.join([job.title, job.company, job.location]))}"
 
@@ -255,6 +266,24 @@ def _linkedin_id_from_url(value: str) -> str | None:
     match = re.search(r"/(?:jobs/)?view/([^/?#]+)", value)
     if match:
         return _slug(match.group(1))
+    return None
+
+
+def _glassdoor_id_from_url(value: str) -> str | None:
+    if not value:
+        return None
+
+    parsed = urlparse(value)
+    query = parse_qs(parsed.query)
+    for key in ("jl", "jobListingId", "job_listing_id"):
+        values = query.get(key)
+        if values and values[0].strip():
+            return _slug(values[0])
+
+    path_match = re.search(r"/([^/?#]+)\.htm$", parsed.path)
+    if path_match:
+        return _slug(path_match.group(1))
+
     return None
 
 

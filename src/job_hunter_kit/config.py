@@ -12,6 +12,9 @@ class ConfigError(ValueError):
     """Raised when a search config file is missing or malformed."""
 
 
+SUPPORTED_PLATFORMS = {"linkedin", "glassdoor"}
+
+
 def load_search_config(path: str | Path) -> SearchConfig:
     config_path = Path(path)
     with config_path.open("r", encoding="utf-8") as file:
@@ -50,10 +53,11 @@ def _parse_collection_config(raw_collection: Any) -> CollectionConfig:
         "collection.platforms",
     )
     unsupported_platforms = [
-        platform for platform in platforms if platform != "linkedin"
+        platform for platform in platforms if platform not in SUPPORTED_PLATFORMS
     ]
     if unsupported_platforms:
-        raise ConfigError("collection.platforms only supports 'linkedin' for now.")
+        supported = "', '".join(sorted(SUPPORTED_PLATFORMS))
+        raise ConfigError(f"collection.platforms only supports '{supported}'.")
 
     translation = raw_collection.get("translation", {})
     if translation is None:
@@ -86,6 +90,10 @@ def _parse_collection_config(raw_collection: Any) -> CollectionConfig:
         hours_old=_parse_positive_int(
             raw_collection.get("hours_old", 72),
             "collection.hours_old",
+        ),
+        country_indeed=_parse_string(
+            raw_collection.get("country_indeed", "Germany"),
+            "collection.country_indeed",
         ),
         linkedin_fetch_description=_parse_bool(
             raw_collection.get("linkedin_fetch_description", False),
