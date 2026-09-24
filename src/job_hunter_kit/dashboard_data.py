@@ -114,7 +114,7 @@ def filter_dataframe(
         for field in searchable_fields:
             column = column_map.get(field)
             if column in filtered.columns:
-                text_mask = text_mask | filtered[column].fillna("").astype(str).str.casefold().str.contains(keyword_value)
+                text_mask = text_mask | filtered[column].fillna("").astype(str).str.casefold().str.contains(keyword_value, regex=False)
         filtered = filtered[text_mask]
 
     priority_col = column_map.get("priority")

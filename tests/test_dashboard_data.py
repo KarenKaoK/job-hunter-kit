@@ -141,6 +141,40 @@ def test_filter_dataframe_applies_keyword_priority_status_and_score():
     assert filtered.iloc[0]["title"] == "Data Scientist"
 
 
+def test_filter_dataframe_treats_keyword_as_plain_text():
+    df = pd.DataFrame(
+        [
+            {
+                "company": "Example AG",
+                "title": "ML Engineer (m/f/d)",
+                "skills_required": "python",
+                "jd_summary": "build models",
+                "application_status": "Not Applied",
+            },
+            {
+                "company": "Other GmbH",
+                "title": "Backend Engineer",
+                "skills_required": "go",
+                "jd_summary": "backend systems",
+                "application_status": "Not Applied",
+            },
+        ]
+    )
+
+    filtered = filter_dataframe(
+        df=df,
+        column_map=resolve_columns(df),
+        keyword="(m/f/d)",
+        priorities=[],
+        german_required_values=[],
+        application_status_values=[],
+        min_match_score=0.0,
+    )
+
+    assert len(filtered) == 1
+    assert filtered.iloc[0]["title"] == "ML Engineer (m/f/d)"
+
+
 def test_apply_edits_updates_only_editable_columns():
     original = pd.DataFrame(
         [

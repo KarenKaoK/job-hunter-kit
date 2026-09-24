@@ -22,6 +22,16 @@ def test_master_job_id_uses_linkedin_url_id_before_job_id():
     assert master_job_id(job) == "linkedin:98765"
 
 
+def test_master_job_id_uses_glassdoor_listing_id_from_url():
+    job = _job(
+        id="internal-id",
+        source="glassdoor",
+        url="https://www.glassdoor.com/job-listing/ml-engineer.htm?jl=1009876543210",
+    )
+
+    assert master_job_id(job) == "glassdoor:1009876543210"
+
+
 def test_master_job_id_falls_back_to_readable_identity():
     job = _job(id="", url=None)
 

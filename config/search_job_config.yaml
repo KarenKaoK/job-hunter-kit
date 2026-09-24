@@ -2,16 +2,10 @@ collection:
   provider: jobspy
   platforms:
     - linkedin
+    - glassdoor
   locations:
-    - Netherlands
-    - France
-    - Czechia
     - Berlin
     - Munich
-    - Essen
-    - Prague
-    - Brno
-    - Paris
   search_terms:
     - machine learning engineer
     - data scientist
@@ -20,6 +14,7 @@ collection:
     - MLops
   results_per_term: 50
   hours_old: 72
+  country_indeed: Germany
   linkedin_fetch_description: true
   translation:
     enabled: true
@@ -31,18 +26,8 @@ include:
   title_keywords: []
   keywords: []
   locations:
-    - Netherlands
-    - France
-    - Czechia
-    - Czech Republic
-    - Czech
     - Berlin
     - Munich
-    - Essen
-    - Prague
-    - Praha
-    - Brno
-    - Paris
     - remote
   work_modes:
     - remote
@@ -63,3 +48,4 @@ exclude:
 
 sources:
   - linkedin
+  - glassdoor

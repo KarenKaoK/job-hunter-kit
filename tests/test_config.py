@@ -11,6 +11,7 @@ def test_parse_search_config_with_valid_rules():
                 "search_terms": ["Data Scientist"],
                 "results_per_term": 10,
                 "hours_old": 24,
+                "country_indeed": "Germany",
                 "linkedin_fetch_description": True,
             },
             "include": {
@@ -31,6 +32,7 @@ def test_parse_search_config_with_valid_rules():
     assert config.collection.search_terms == ["Data Scientist"]
     assert config.collection.results_per_term == 10
     assert config.collection.hours_old == 24
+    assert config.collection.country_indeed == "Germany"
     assert config.collection.linkedin_fetch_description is True
     assert config.collection.translation_enabled is False
     assert config.collection.translation_provider == "google"
@@ -57,6 +59,7 @@ def test_parse_search_config_defaults_missing_sections_to_empty_rules():
     assert config.collection.search_terms == []
     assert config.collection.results_per_term == 25
     assert config.collection.hours_old == 72
+    assert config.collection.country_indeed == "Germany"
     assert config.collection.translation_enabled is False
     assert config.collection.translation_provider == "google"
     assert config.collection.translation_target_language == "zh-CN"
@@ -73,8 +76,22 @@ def test_parse_search_config_rejects_non_string_lists():
         parse_search_config({"include": {"keywords": ["python", 123]}})
 
 
+def test_parse_search_config_supports_glassdoor_collection_platform():
+    config = parse_search_config(
+        {
+            "collection": {
+                "platforms": ["glassdoor"],
+                "country_indeed": "Germany",
+            }
+        }
+    )
+
+    assert config.collection.platforms == ["glassdoor"]
+    assert config.collection.country_indeed == "Germany"
+
+
 def test_parse_search_config_rejects_unsupported_collection_platform():
-    with pytest.raises(ConfigError, match="only supports 'linkedin'"):
+    with pytest.raises(ConfigError, match="only supports 'glassdoor', 'linkedin'"):
         parse_search_config({"collection": {"platforms": ["indeed"]}})
 
 

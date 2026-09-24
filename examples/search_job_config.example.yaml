@@ -2,6 +2,7 @@ collection:
   provider: jobspy
   platforms:
     - linkedin
+    # - glassdoor
   locations:
     - Berlin
     - Munich
@@ -14,6 +15,7 @@ collection:
     - machine learning
   results_per_term: 5
   hours_old: 72
+  country_indeed: Germany
   linkedin_fetch_description: true
   translation:
     enabled: true
@@ -46,3 +48,4 @@ exclude:
 
 sources:
   - linkedin
+  # - glassdoor

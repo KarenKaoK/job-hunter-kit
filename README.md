@@ -95,9 +95,12 @@ python scripts/collect_linkedin_jobs.py \
 ```
 
 The active collection settings live in `config/search_job_config.yaml` under
-`collection`. LinkedIn is the only supported platform in this first collection
-slice. The project does not use browser automation, login-protected scraping, CV
-matching, cover letter generation, or ATS review in Phase 1.
+`collection`. Supported JobSpy platforms are `linkedin` and `glassdoor`, but the
+active config keeps LinkedIn enabled by default. To try Glassdoor, add
+`glassdoor` to `collection.platforms` and `sources`, then set
+`collection.country_indeed` for the target country used by JobSpy. The project
+does not use browser automation, login-protected scraping, CV matching, cover
+letter generation, or ATS review in Phase 1.
 
 `examples/search_job_config.example.yaml` remains as a template/reference file.
 
